@@ -42,6 +42,18 @@ True
 
 ```
 
+You can also recurse on your own object, using the special class 'Self'
+
+```
+>>> from parseable import parseable, Use, Optional, Self
+>>> User = parseable('User', {'id': int, Optional('parent'): Use(Self)})
+>>> user = User({'id': 2, 'parent': {'id': 1}})
+>>> user.data == {'id': 2, 'parent': {'id': 1}}
+True
+
+```
+
+#>>> user.data == {'id': 2, 'parent': {'id': 1}}
 Producing Content
 -----------------
 
