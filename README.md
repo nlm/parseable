@@ -1,4 +1,4 @@
-Parseable
+Parseable ![Build Status](https://travis-ci.org/nlm/parseable.svg?branch=master "Build Status")
 =========
 
 A python library to make easier the parsing of data structures into objects,
