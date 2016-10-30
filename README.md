@@ -1,6 +1,8 @@
 Parseable ![Build Status](https://travis-ci.org/nlm/parseable.svg?branch=master "Build Status")
 =========
 
+*Warning*: This is software is in beta stage
+
 A python library to make easier the parsing of data structures into objects,
 with strong validation.
 
