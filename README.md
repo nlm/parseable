@@ -55,7 +55,6 @@ True
 
 ```
 
-#>>> user.data == {'id': 2, 'parent': {'id': 1}}
 Producing Content
 -----------------
 
