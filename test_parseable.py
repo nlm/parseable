@@ -123,6 +123,20 @@ class Subscriptable(TestCase):
         self.assertEqual(self.message['flags'][1]['id'], 12)
 
 
+class SchemaDefaults(TestCase):
+
+    def setUp(self):
+        self.Message = parseable('Message', {'id': int, Optional('text', default='<message was empty>'): str})
+        self.message1 = Message({'id': 1, 'text': 'Hello, World!'})
+        self.message2 = Message({'id': 2})
+
+    def check_filled(self):
+        self.assertEqual(self.message1['text'], 'Hello, World!')
+
+    def check_default(self):
+        self.assertEqual(self.message2['text'], '<message was empty>')
+
+
 class TestStr(TestCase):
 
     def test_simple(self):
