@@ -17,7 +17,6 @@ class Parseable(object):
     '''
     _schema = None
     _schema_processed = False
-    _expanded_data = None
 
     def __init__(self, data):
         '''
@@ -27,6 +26,7 @@ class Parseable(object):
         '''
         assert self._schema_processed is True
         self._data = Schema(self._schema, ignore_extra_keys=True).validate(data)
+        self._data = self._expand_parseables(self._data)
 
     @property
     def data(self):
@@ -35,9 +35,7 @@ class Parseable(object):
 
         :return: the validated data
         '''
-        if self._expanded_data is None:
-            self._expanded_data = self._expand_parseables(self._data)
-        return self._expanded_data
+        return self._data
 
     @property
     def schema(self):
