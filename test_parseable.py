@@ -92,6 +92,37 @@ class SubParseableSelfDepthList(TestCase):
         self.Depth(self.data)
 
 
+class Subscriptable(TestCase):
+
+    def setUp(self):
+        self.Flag = parseable('Flag', {'id': int, 'value': bool})
+        self.FlagSet = parseable('FlagSet', [Use(self.Flag)])
+        self.User = parseable('User', {'id': int, 'name': str})
+        self.Message = parseable('Message', {'from': Use(self.User),
+                                             'id': int, 'text': str,
+                                             'flags': Use(self.FlagSet)})
+
+        self.data = {'from': {'id': 42, 'name': 'Joe User'},
+                     'id': 4242,
+                     'text': 'Hello, World!',
+                     'flags': [{'id': 5, 'value': True},
+                               {'id': 12, 'value': False}]}
+
+        self.message = self.Message(self.data)
+
+    def test_subscript_mapping(self):
+        self.assertEqual(self.message['id'], 4242)
+        self.assertEqual(self.message['text'], 'Hello, World!')
+
+    def test_subscript_submapping(self):
+        self.assertEqual(self.message['from']['id'], 42)
+        self.assertEqual(self.message['from']['name'], 'Joe User')
+
+    def test_subscript_sequence(self):
+        self.assertEqual(self.message['flags'][0]['id'], 5)
+        self.assertEqual(self.message['flags'][1]['id'], 12)
+
+
 class TestStr(TestCase):
 
     def test_simple(self):
