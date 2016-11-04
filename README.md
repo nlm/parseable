@@ -1,8 +1,6 @@
 Parseable ![Build Status](https://travis-ci.org/nlm/parseable.svg?branch=master "Build Status")
 =========
 
-*Warning*: This is software is in beta stage
-
 A python library to make easier the parsing of data structures into objects,
 with strong validation.
 
@@ -11,10 +9,17 @@ This has been originally developed to parse messages from the Telegram Bot API
 
 Data validation is done using 'schema' (https://pypi.python.org/pypi/schema)
 
+Software in Development
+-----------------------
+
+Warning: This is software is in beta stage, it is subject to changes
+
 Basic Usage
 -----------
 
-Basic usage is simple. You call the 'parseable' function
+Basic usage is simple. You call the 'parseable' function, providing
+a class name and a validation schema (see the 'schema' package documentation
+for more informations)
 
 ```
 >>> from parseable import parseable
@@ -55,6 +60,11 @@ True
 
 ```
 
+Defaults
+--------
+
+As with Schema, you can use defaults
+
 Producing Content
 -----------------
 
@@ -76,3 +86,42 @@ True
 You can then encode this a json and send this to your API endpoint.
 This way, you can guarantee the correctness of data structures
 on input and output operations.
+
+Types and inheritance
+---------------------
+
+All the objects as subclasses of parseable.Parseable, you can check
+if an object is a parseable like this:
+
+```
+>>> from parseable import parseable, Parseable
+>>> User = parseable('User', {'id': int, 'name': str})
+>>> issubclass(User, Parseable)
+True
+
+```
+
+Some Parseables will verify as Sequence or Mapping, depending on the Schema
+that you create them with.
+
+```
+>>> from parseable import parseable
+>>> from collections import Sequence, Mapping
+>>>
+>>> seq_schema = [int]
+>>> MySeq = parseable('MySeq', seq_schema)
+>>> myseq = MySeq([1, 2, 3])
+>>> isinstance(seq_schema, Sequence)
+True
+>>> isinstance(myseq, Sequence)
+True
+>>>
+>>> map_schema = {str: str}
+>>> MyMap = parseable('MyMap', map_schema)
+>>> mymap = MyMap({'test': 'ok'})
+>>> isinstance(map_schema, Mapping)
+True
+>>> isinstance(mymap, Mapping)
+True
+
+```
