@@ -6,7 +6,11 @@ except ImportError:
     from collections import Mapping, Sequence
 
 
-class Self(object): pass
+class Self(object):
+    '''
+    Object to represent a class in itself before it's instantiated
+    '''
+    pass
 
 
 class Parseable(object):
@@ -63,6 +67,11 @@ class Parseable(object):
 
 
 class MappingParseable(Parseable, Mapping):
+    '''
+    Base class for list-like Parseables
+
+    Must not be instantiated or subclassed directly
+    '''
 
     def __getitem__(self, key):
         return self._data.__getitem__(key)
@@ -75,6 +84,11 @@ class MappingParseable(Parseable, Mapping):
 
 
 class SequenceParseable(Parseable, Sequence):
+    '''
+    Base class for dict-like Parseables
+
+    Must not be instantiated or subclassed directly
+    '''
 
     def __getitem__(self, key):
         return self._data.__getitem__(key)
@@ -84,6 +98,11 @@ class SequenceParseable(Parseable, Sequence):
 
 
 class DefaultParseable(Parseable):
+    '''
+    Base class for other types of Parseables
+
+    Must not be instantiated or subclassed directly
+    '''
     pass
 
 
