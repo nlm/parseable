@@ -1,7 +1,11 @@
 from unittest import TestCase
 from schema import Optional, Use
-from parseable import parseable, Self, SchemaError
+from parseable import parseable, Self, SchemaError, Parseable
 from random import randint
+try:
+    from collections.abc import Sequence, Mapping
+except ImportError:
+    from collections import Sequence, Mapping
 
 
 class SimpleTest(TestCase):
@@ -88,6 +92,51 @@ class SubParseableSelfDepthList(TestCase):
         self.Depth(self.data)
 
 
+class Subscriptable(TestCase):
+
+    def setUp(self):
+        self.Flag = parseable('Flag', {'id': int, 'value': bool})
+        self.FlagSet = parseable('FlagSet', [Use(self.Flag)])
+        self.User = parseable('User', {'id': int, 'name': str})
+        self.Message = parseable('Message', {'from': Use(self.User),
+                                             'id': int, 'text': str,
+                                             'flags': Use(self.FlagSet)})
+
+        self.data = {'from': {'id': 42, 'name': 'Joe User'},
+                     'id': 4242,
+                     'text': 'Hello, World!',
+                     'flags': [{'id': 5, 'value': True},
+                               {'id': 12, 'value': False}]}
+
+        self.message = self.Message(self.data)
+
+    def test_subscript_mapping(self):
+        self.assertEqual(self.message['id'], 4242)
+        self.assertEqual(self.message['text'], 'Hello, World!')
+
+    def test_subscript_submapping(self):
+        self.assertEqual(self.message['from']['id'], 42)
+        self.assertEqual(self.message['from']['name'], 'Joe User')
+
+    def test_subscript_sequence(self):
+        self.assertEqual(self.message['flags'][0]['id'], 5)
+        self.assertEqual(self.message['flags'][1]['id'], 12)
+
+
+class SchemaDefaults(TestCase):
+
+    def setUp(self):
+        self.Message = parseable('Message', {'id': int, Optional('text', default='<message was empty>'): str})
+        self.message1 = Message({'id': 1, 'text': 'Hello, World!'})
+        self.message2 = Message({'id': 2})
+
+    def check_filled(self):
+        self.assertEqual(self.message1['text'], 'Hello, World!')
+
+    def check_default(self):
+        self.assertEqual(self.message2['text'], '<message was empty>')
+
+
 class TestStr(TestCase):
 
     def test_simple(self):
@@ -105,3 +154,82 @@ class TestStr(TestCase):
         dic = Dict({'a': 0})
         self.assertEqual(str(dic), 'Dict({\'a\': 0})')
 
+
+class NoDirectInstance(TestCase):
+
+    def test_direct_instance(self):
+        self.assertRaises(AssertionError, Parseable, None)
+
+
+class ABCSequence(TestCase):
+
+    def setUp(self):
+        self.reflist = list([1, 2, 3])
+        self.IntList = parseable('IntList', [int])
+        self.intlist = self.IntList(self.reflist)
+
+    def test_inheritance(self):
+        self.assertTrue(isinstance(self.intlist, Parseable))
+        self.assertTrue(isinstance(self.intlist, Sequence))
+
+    def test_notinheritance(self):
+        self.assertFalse(isinstance(self.intlist, Mapping))
+
+    def test_iteration(self):
+        self.assertEqual([x for x in self.intlist], [x for x in self.reflist])
+
+    def test_getitem(self):
+        self.assertEqual(self.intlist[0], self.reflist[0])
+
+    def test_len(self):
+        self.assertEqual(len(self.intlist), len(self.reflist))
+
+
+
+class ABCMapping(TestCase):
+
+    def setUp(self):
+        self.refdict = dict(enumerate([1, 2, 3]))
+        self.IntDict = parseable('IntDict', {int: int})
+        self.intdict = self.IntDict(self.refdict)
+
+    def test_inheritance(self):
+        self.assertTrue(isinstance(self.intdict, Parseable))
+        self.assertTrue(isinstance(self.intdict, Mapping))
+
+    def test_notinheritance(self):
+        self.assertFalse(isinstance(self.intdict, Sequence))
+
+    def test_iteration(self):
+        self.assertEqual({key: value for key, value in self.intdict.items()},
+                         {key: value for key, value in self.refdict.items()})
+
+    def test_getitem(self):
+        self.assertEqual(self.intdict[0], self.refdict[0])
+
+    def test_len(self):
+        self.assertEqual(len(self.intdict), len(self.refdict))
+
+
+class ABCScalar(TestCase):
+
+    def setUp(self):
+        self.refscal = 42
+        self.IntScal = parseable('IntScal', int)
+        self.intscal = self.IntScal(self.refscal)
+
+    def test_inheritance(self):
+        self.assertTrue(isinstance(self.intscal, Parseable))
+
+    def test_notinheritance(self):
+        self.assertFalse(isinstance(self.intscal, Sequence))
+        self.assertFalse(isinstance(self.intscal, Mapping))
+
+    def test_iteration(self):
+        self.assertRaises(TypeError, lambda seq: [x for x in seq], self.refscal)
+
+    def test_getitem(self):
+        self.assertRaises(TypeError, lambda dic: dic[0], self.refscal)
+
+    def test_len(self):
+        self.assertRaises(TypeError, len, self.refscal)
