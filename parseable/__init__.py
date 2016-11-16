@@ -30,7 +30,6 @@ class Parseable(object):
         '''
         assert self._schema_processed is True
         self._data = Schema(self._schema, ignore_extra_keys=True).validate(data)
-        self._data = self._expand_parseables(self._data)
 
     @property
     def data(self):
@@ -49,18 +48,6 @@ class Parseable(object):
         :return: the schema which this object validates data against
         '''
         return self._schema
-
-    @classmethod
-    def _expand_parseables(cls, data):
-        if isinstance(data, list):
-            return [cls._expand_parseables(elt) for elt in data]
-        elif isinstance(data, dict):
-            return {key: cls._expand_parseables(val)
-                    for key, val in data.items()}
-        elif isinstance(data, Parseable):
-            return data.data
-        else:
-            return data
 
     def __repr__(self):
         return '{}({})'.format(self.__class__.__name__, self.data)
@@ -157,3 +144,21 @@ def parseable(name, schema):
     cls = type(name, (base_class,), {'_schema': schema})
     _replace_self(cls, cls._schema)
     return cls
+
+def expand(data):
+    '''
+    expands parseables inside a data structure
+
+    :param data: the data structure to expand
+    :type data: object
+    :return: the expanded data
+    '''
+    if isinstance(data, dict):
+        return {key: expand(val)
+                for key, val in data.items()}
+    elif isinstance(data, list):
+        return [expand(elt) for elt in data]
+    elif isinstance(data, Parseable):
+        return expand(data.data)
+    else:
+        return data
