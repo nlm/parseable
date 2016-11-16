@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name = "parseable",
-    version = "1.0b2",
+    version = "1.0b3",
     packages = find_packages(),
     author = "Nicolas Limage",
     author_email = 'github@xephon.org',
