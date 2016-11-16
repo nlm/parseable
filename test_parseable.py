@@ -1,6 +1,6 @@
 from unittest import TestCase
 from schema import Optional, Use
-from parseable import parseable, Self, SchemaError, Parseable
+from parseable import parseable, expand, Self, SchemaError, Parseable
 from random import randint
 try:
     from collections.abc import Sequence, Mapping
@@ -233,3 +233,62 @@ class ABCScalar(TestCase):
 
     def test_len(self):
         self.assertRaises(TypeError, len, self.refscal)
+
+
+class ExpandSimple(TestCase):
+
+    def test_expand_dict(self):
+        data = {'test': 'ok'}
+        self.assertEqual(data, expand(data))
+
+    def test_expand_list(self):
+        data = ['test', 'ok']
+        self.assertEqual(data, expand(data))
+
+
+class ExpandParseable(TestCase):
+
+    def setUp(self):
+        self.data = {'test': 'ok'}
+        self.Thing = parseable('Thing', {'test': str})
+        self.thing = self.Thing(self.data)
+
+    def test_parseable_value(self):
+        self.assertEqual(self.thing, self.data)
+
+    def test_expanded_parseable_value(self):
+        self.assertEqual(expand(self.thing), self.data)
+
+    def test_parseable_type(self):
+        self.assertNotEqual(type(self.thing), type(self.data))
+
+    def test_expanded_parseable_type(self):
+        self.assertEqual(type(expand(self.thing)), type(self.data))
+
+
+class ExpandSubparseable(TestCase):
+
+    def setUp(self):
+        self.User = parseable('User', {'id': int, 'name': str})
+        self.Message = parseable('Message', {'from': Use(self.User),
+                                             'id': int, 'text': str})
+        self.data = {'from': {'id': 2, 'name': 'Test'},
+                     'id': 4, 'text': 'Hi'}
+
+        self.message = self.Message(self.data)
+
+    def test_subparseable_value(self):
+        self.assertEqual(self.message, self.data)
+        self.assertEqual(self.message['from'], self.data['from'])
+
+    def test_expanded_subparseable_value(self):
+        self.assertEqual(self.message, self.data)
+        self.assertEqual(self.message['from'], self.data['from'])
+
+    def test_subparseable_type(self):
+        self.assertNotEqual(type(self.message), type(self.data))
+        self.assertNotEqual(type(self.message['from']), type(self.data['from']))
+
+    def test_expanded_subparseable_type(self):
+        self.assertEqual(type(expand(self.message)), type(self.data))
+        self.assertEqual(type(expand(self.message['from'])), type(self.data['from']))

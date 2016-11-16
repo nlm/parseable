@@ -63,7 +63,19 @@ True
 Defaults
 --------
 
-As with Schema, you can use defaults
+As with Schema, you can use defaults:
+
+```
+>>> from parseable import parseable, Use, Optional, Self
+>>> DefDemo = parseable('DefDemo', {Optional('id', default=4): int})
+>>> defdemo = DefDemo({'id': 2})
+>>> defdemo['id'] == 2
+True
+>>> defdemo = DefDemo({})
+>>> defdemo['id'] == 4
+True
+
+```
 
 Producing Content
 -----------------
@@ -125,3 +137,29 @@ True
 True
 
 ```
+
+Value Expansion
+---------------
+
+You can use parseable object instances as any other object, but sometimes,
+you really need the real underlying data structures types. For example,
+when you want to use special types properties or when you want to dump
+data using the json module.
+
+```
+>>> from parseable import parseable, expand
+>>> Int = parseable('Int', int)
+>>> integer = Int(3)
+>>> try:
+...     print(integer * integer)
+... except TypeError as err:
+...     print(err)
+...
+unsupported operand type(s) for *: 'Int' and 'Int'
+>>> print(expand(integer) * expand(integer))
+9
+
+```
+
+Note: expand recurses on lists and dicts, so if you have nested Parseables,
+the whole structure will be expanded.
