@@ -148,7 +148,7 @@ False
 >>> message = expand(message)
 >>> isinstance(message, dict)
 True
->>> json.dumps(message)
+>>> json.dumps(message) # doctest: +SKIP
 '{"text": "Hello", "from": {"id": 2, "name": "Joe"}}'
 
 ```
