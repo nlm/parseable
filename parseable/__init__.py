@@ -21,6 +21,7 @@ class Parseable(object):
     '''
     _schema = None
     _schema_processed = False
+    _ignore_extra_keys = None
 
     def __init__(self, data):
         '''
@@ -29,7 +30,9 @@ class Parseable(object):
         :param data: the data to validate with this object
         '''
         assert self._schema_processed is True
-        self._data = Schema(self._schema, ignore_extra_keys=True).validate(data)
+        self._data = Schema(self._schema,
+                            ignore_extra_keys=
+                            self._ignore_extra_keys).validate(data)
 
     @property
     def data(self):
@@ -124,14 +127,16 @@ def _replace_self(cls, data):
     if issubclass(cls, Parseable):
         cls._schema_processed = True
 
-def parseable(name, schema):
+def parseable(name, schema, ignore_extra_keys=False):
     '''
     creates a new Parseable class
 
     :param name: the name of the new class to create
     :param schema: the 'schema'-compliant schema
+    :param ignore_extra_keys: ignore extra keys in schema
     :type name: str
     :type schema: Schema
+    :type ignore_extra_keys: bool
     :return: the customized Parseable Class
     '''
     if isinstance(schema, Mapping):
@@ -141,7 +146,9 @@ def parseable(name, schema):
     else:
         base_class = DefaultParseable
 
-    cls = type(name, (base_class,), {'_schema': schema})
+    cls = type(name, (base_class,),
+               {'_schema': schema,
+                '_ignore_extra_keys': ignore_extra_keys})
     _replace_self(cls, cls._schema)
     return cls
 

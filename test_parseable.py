@@ -292,3 +292,21 @@ class ExpandSubparseable(TestCase):
     def test_expanded_subparseable_type(self):
         self.assertEqual(type(expand(self.message)), type(self.data))
         self.assertEqual(type(expand(self.message['from'])), type(self.data['from']))
+
+
+class ExtraKeys(TestCase):
+
+    def setUp(self):
+        self.gooddata= {'id': 1, 'name': 'John'}
+        self.baddata = {'id': 1, 'name': 'John', 'mission': 'impossible'}
+
+    def test_no_extra_keys(self):
+        User = parseable('User', {'id': int, 'name': str})
+        self.assertEqual(User(self.gooddata), self.gooddata)
+        self.assertRaises(SchemaError, User, self.baddata)
+
+    def test_extra_keys(self):
+        User = parseable('User', {'id': int, 'name': str}, ignore_extra_keys=True)
+        self.assertEqual(User(self.gooddata), self.gooddata)
+        self.assertEqual(User(self.baddata), self.gooddata)
+
