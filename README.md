@@ -120,7 +120,9 @@ you really need the real underlying data structures types. For example,
 when you want to use operators or when you want to dump
 data using the json module.
 
-### Using type-specific operators:
+### Using type-specific operators
+
+If you need to access the object data, you can use the `data` attribute.
 
 ```python
 >>> from parseable import parseable, expand
@@ -132,15 +134,21 @@ data using the json module.
 ...     print(err)
 ...
 unsupported operand type(s) for *: 'Int' and 'Int'
->>> print(expand(integer) * expand(integer))
+>>> print(integer.data * integer.data)
 9
 
 ```
 
 ### Encoding objects as JSON
 
+If you have nested Parseables, you might want to get the values of
+all the sub-objects too. In this case, you can use the `expand` function.
+It recurses on lists and dicts, so if you have nested Parseables,
+the whole structure will be expanded.
+
 ```python
 >>> import json
+>>> user = User({'id': 2, 'name': 'Joe'})
 >>> message = Message({'from': user.data, 'text': 'Hello'})
 >>> isinstance(message, dict)
 False
@@ -152,9 +160,6 @@ True
 '{"text": "Hello", "from": {"id": 2, "name": "Joe"}}'
 
 ```
-
-Note: expand recurses on lists and dicts, so if you have nested Parseables,
-the whole structure will be expanded.
 
 Types and inheritance
 ---------------------
