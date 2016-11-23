@@ -1,4 +1,4 @@
-Parseable [![Build Status](https://travis-ci.org/nlm/parseable.svg?branch=master "Build Status")]() [![License: MIT](https://img.shields.io/github/license/nlm/parseable.svg)](https://opensource.org/licenses/MIT)
+Parseable [![Build Status](https://travis-ci.org/nlm/parseable.svg?branch=master "Build Status")]() [![License: MIT](https://img.shields.io/github/license/nlm/parseable.svg)](https://opensource.org/licenses/MIT) [![Coverage](https://img.shields.io/codecov/c/github/nlm/parseable.svg)]()
 =========
 
 A python library to make easier the parsing of data structures into objects,
