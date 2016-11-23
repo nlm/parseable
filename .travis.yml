@@ -7,7 +7,10 @@ python:
   - "pypy"
 install:
   - "pip install ."
+  - "pip install coverage"
 script:
-  - "python setup.py test"
   - "python -m doctest README.md"
+  - "coverage run --source parseable setup.py test"
+after_success:
+    - "bash <(curl -s https://codecov.io/bash)"
 sudo: false
