@@ -1,5 +1,5 @@
 from unittest import TestCase
-from schema import Optional, Use
+from schema import Schema, Optional, Use, Or
 from parseable import parseable, expand, Self, SchemaError, Parseable
 from random import randint
 try:
@@ -62,20 +62,32 @@ class SubParseableTest(TestCase):
         self.assertEqual(depth.data, [[{'id': 2, 'name': 'Joe'}]])
 
 
-class SubParseableSelf(TestCase):
+class SubParseableSelfMapping(TestCase):
 
     def setUp(self):
         self.Linked = parseable('Linked', {'val': int, Optional('next'): Use(Self)})
         self.data = {'val': 0, 'next': {'val': 1, 'next': {'val': 2}}}
 
-    def test_parse(self):
+    def test_parse_mapping(self):
         self.assertEqual(self.Linked(self.data).data, self.data)
+
+
+class SubParseableSelfSequence(TestCase):
+
+    def setUp(self):
+        self.Group = parseable('Group', [Optional(1), Use(Self)])
+
+    def test_parse_sequence(self):
+        self.data = [1, []]
+        self.assertEqual(expand(self.Group(self.data)), self.data)
 
 
 class SubParseableSelfDepthFunc(TestCase):
 
     def setUp(self):
-        self.Linked = parseable('Linked', {'val': int, Optional('next'): Optional(Optional(Use(Self)))})
+        self.Linked = parseable('Linked',
+                                {'val': int,
+                                 Optional('next'): Optional(Use(Self))})
         self.data = {'val': 0, 'next': {'val': 1, 'next': {'val': 2}}}
 
     def test_parse(self):
@@ -90,6 +102,36 @@ class SubParseableSelfDepthList(TestCase):
 
     def test_parse(self):
         self.Depth(self.data)
+
+
+class SubParseableSelfSchema(TestCase):
+
+    def setUp(self):
+        self.schema = Schema({'id': int, 'name': str})
+        self.User = parseable('User', self.schema)
+
+    def test_schema(self):
+        user1 = self.User({'id': 1, 'name': 'Joe'})
+
+
+class SubParseableSelfInstance(TestCase):
+
+    def setUp(self):
+        self.UserUse = parseable('UserUse', {'id': int, 'name': str,
+                                             Optional('best_friend'): Use(Self)})
+        self.UserNoUse = parseable('UserNoUse', {'id': int, 'name': str,
+                                                 Optional('best_friend'): Self})
+
+    def test_useruse(self):
+        user1 = self.UserUse({'id': 1, 'name': 'Joe'})
+        user2 = self.UserUse({'id': 2, 'name': 'Jack', 'best_friend': user1})
+        user3 = self.UserUse({'id': 3, 'name': 'Jill', 'best_friend': expand(user1)})
+
+    def test_usernouse(self):
+        user1 = self.UserNoUse({'id': 1, 'name': 'Joe'})
+        user2 = self.UserNoUse({'id': 2, 'name': 'Jack', 'best_friend': user1})
+        self.assertRaises(SchemaError, self.UserNoUse, {'id': 3, 'name': 'Jill',
+                                                        'best_friend': expand(user1)})
 
 
 class Subscriptable(TestCase):
@@ -309,4 +351,15 @@ class ExtraKeys(TestCase):
         User = parseable('User', {'id': int, 'name': str}, ignore_extra_keys=True)
         self.assertEqual(User(self.gooddata), self.gooddata)
         self.assertEqual(User(self.baddata), self.gooddata)
+
+
+class TestSchema(TestCase):
+
+    def setUp(self):
+        self.schema = {'id': int}
+        self.User = parseable('User', self.schema)
+        self.user = self.User({'id': 2})
+
+    def test_schema(self):
+        self.assertEqual(self.schema, self.user.schema)
 
