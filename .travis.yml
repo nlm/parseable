@@ -1,9 +1,12 @@
 language: python
 python:
+  - "2.6"
   - "2.7"
   - "3.3"
   - "3.4"
   - "3.5"
+  - "3.6-dev"
+  - "nightly"
   - "pypy"
 install:
   - "pip install ."
@@ -13,4 +16,9 @@ script:
   - "coverage run --source parseable setup.py test"
 after_success:
     - "bash <(curl -s https://codecov.io/bash)"
+matrix:
+  allow_failures:
+    - python: "2.6"
+    - python: "3.6-dev"
+    - python: "nightly"
 sudo: false
