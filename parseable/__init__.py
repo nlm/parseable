@@ -30,6 +30,8 @@ class Parseable(object):
         :param data: the data to validate with this object
         '''
         assert self._schema_processed is True
+        if isinstance(data, self.__class__):
+            data = data.data
         self._data = Schema(self._schema,
                             ignore_extra_keys=
                             self._ignore_extra_keys).validate(data)
