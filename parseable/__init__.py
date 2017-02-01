@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from schema import Schema, Optional, Use, SchemaError
+from schema import Schema, Optional, Use, SchemaError, And, Or, Regex
 try:
     from collections.abc import Mapping, Sequence
 except ImportError:
