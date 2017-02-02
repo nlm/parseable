@@ -5,7 +5,7 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
-  - "3.6-dev"
+  - "3.6"
   - "nightly"
   - "pypy"
   - "pypy3"
@@ -21,6 +21,5 @@ matrix:
   fast_finish: true
   allow_failures:
     - python: "2.6"
-    - python: "3.6-dev"
     - python: "nightly"
 sudo: false
