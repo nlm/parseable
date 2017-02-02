@@ -363,3 +363,8 @@ class TestSchema(TestCase):
     def test_schema(self):
         self.assertEqual(self.schema, self.user.schema)
 
+class TestMisc(TestCase):
+
+    def test_static(self):
+        schema = {'Test': 'OK'}
+        Test = parseable('Test', schema)

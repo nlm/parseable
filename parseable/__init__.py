@@ -103,7 +103,7 @@ def _replace_self(cls, data):
     Replace instances of 'Self' by own class in the current schema
     This makes recursive parsing possible
     '''
-    if isinstance(data, Sequence):
+    if isinstance(data, Sequence) and not isinstance(data, str):
         for idx, val in enumerate(data):
             if val is Self:
                 data[idx] = cls
